@@ -1,0 +1,6 @@
+{
+  "settings": {
+    "servKey": "cert/server.key",
+    "servCrt": "cert/server.crt"
+  }
+}
