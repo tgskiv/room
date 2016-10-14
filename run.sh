@@ -1,1 +1,1 @@
-cd /var/www/dashboard.php.qarea.org/public_html/analytics/collaboration && screen -S collaboration -d -m ./node index.js
+screen -S collaboration -d -m ./node index.js

@@ -16,25 +16,25 @@ Room.prototype.getHash = function(){
 Room.prototype.setHash = function(hash){
     this.hash = hash;
 };
-Room.prototype.hasUser = function(user){
-    for (var i in this.users) {
-        if (this.users[i].uid == user.uid) {
-            return i;
-        }
-    }
-    return false;
-}
-Room.prototype.addUser = function(user){
-    if (!this.hasUser(user)) {
-        this.users.push(user);
-    }
-}
-Room.prototype.remUser = function(user){
-    var userFound = this.hasUser(user);
-    if (userFound!==false) {
-        this.users.splice(userFound, 1);
-    }
-}
+//Room.prototype.hasUser = function(user){
+//    for (var i in this.users) {
+//        if (this.users[i].uid == user.uid) {
+//            return i;
+//        }
+//    }
+//    return false;
+//}
+//Room.prototype.addUser = function(user){
+//    if (!this.hasUser(user)) {
+//        this.users.push(user);
+//    }
+//}
+//Room.prototype.remUser = function(user){
+//    var userFound = this.hasUser(user);
+//    if (userFound!==false) {
+//        this.users.splice(userFound, 1);
+//    }
+//}
 Room.prototype.getUsers = function(){
     return this.users;
 }
@@ -59,6 +59,7 @@ Room.prototype.addConnection = function(connection) {
         console.log('room already exists: '+this.getHash());
     }
 }
+
 Room.prototype.remConnection = function(connection) {
     var connectionFound = this.hasConnection(connection);
     console.log('Going to remove connection from room: ', this.getHash(), ' id: ', connectionFound);
@@ -66,6 +67,7 @@ Room.prototype.remConnection = function(connection) {
         connections.splice(connectionFound, 1);
     }
 }
+
 Room.prototype.getConnections = function() {
     var connsList = [];
     
@@ -84,7 +86,7 @@ Room.prototype.getConnections = function() {
 
 function getRoomByHash(hash) {
     for (var i in rooms) {
-        if (rooms[i].getHash() == hash) {
+        if (rooms[i].getHash() === hash) {
             return rooms[i];
         }
     }
@@ -93,19 +95,17 @@ function getRoomByHash(hash) {
 
 
 
-
-var MappingManager = {
+var RoomMapping = {
     rooms : rooms,
     
-    remUserFromRoom : function(user, roomHash, connection) {
+    remConnectionFromRoom : function(roomHash, connection) {
         var room = getRoomByHash(roomHash);
         if (room) {
-            room.remUser(user);
             room.remConnection(connection);
         }
     },
     
-    addUserToRoom : function(user, roomHash, connection) {
+    addConnectionToRoom : function(roomHash, connection) {
         var room = getRoomByHash(roomHash);
         
         if (!room) {
@@ -113,7 +113,6 @@ var MappingManager = {
             this.rooms.push(room);
         }
         
-        room.addUser(user);
         room.addConnection(connection);
     },
     
@@ -131,11 +130,46 @@ var MappingManager = {
     getUsersInRoom : function(roomHash) {
         var room = getRoomByHash(roomHash);
         if (room) {
-            return room.getUsers();
+            var connections = room.getConnections();
+            var users = [];
+            
+            for (var i = 0; i < connections.length; i++ ) {
+                if (!connections[i].connected) {
+                    continue;
+                }
+                
+                var name = "Anonym "+Math.round(Math.random()*9999);
+                
+                /**
+                 * @todo get name from connections
+                 */
+                users.push({login: name, uid: 0});
+            }
+            
+            return users;
         } else {
             return [];
         }
+    },
+    
+    getConnectionsInSameRoom : function(connection) {
+        for (var i = 0; i < rooms.length; i++) {
+            if (rooms[i].hasConnection(connection)) {
+                return rooms[i].getConnections();
+            }
+        }
+        
+        return [];
+    },
+    
+    getRoomByConnection : function(connection) {
+        for (var i = 0; i <= rooms.length-1; i++) {
+            if (rooms[i].hasConnection(connection)) {
+                return rooms[i];
+            }
+        }
+        return false;
     }
 };
 
-module.exports = MappingManager;
+module.exports = RoomMapping;
